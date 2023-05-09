@@ -1,118 +1,105 @@
 "use client";
+import React, { useCallback, useEffect, useRef } from 'react';
 import styled from 'styled-components';
-import React from 'react';
-import { VictoryChart, VictoryScatter, VictoryBar, VictoryAxis, VictoryLabel, VictoryContainer } from 'victory';
+import downloadjs from "downloadjs";
+import domtoimage from 'dom-to-image';
+import { toPng, toJpeg, toBlob, toPixelData, toSvg } from 'html-to-image';
 import { useChartDataState } from '@/recoil/chartData';
-// import { ReactComponent as Svg1} from "./svg/file1.svg";
-// import { ReactComponent as Svg2} from "./svg/file2.svg";
-// import { ReactComponent as Svg3} from "./svg/file3.svg";
-// import { ReactComponent as Svg4} from "./svg/file4.svg";
-// import { ReactComponent as Svg5} from "./svg/file5.svg";
-// import { ReactComponent as Svg6} from "./svg/file6.svg";
-// import Svg1 from "./svg/file1.svg";
-// import Svg2 from "./svg/file2.svg";
-// import Svg3 from "./svg/file3.svg";
-// import Svg4 from "./svg/file4.svg";
-// import Svg5 from "./svg/file5.svg";
-// import Svg6 from "./svg/file6.svg";
+import Bar from '@/components/chart/Bar';
+import axios from 'axios';
 
 const Container = styled.div`
-    width: 900px;
-    height: 600px;
-    background-color: #F7FAFF;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  display: 'flex';
+`
+const ImageContainer = styled.div`
+  width: max-content;
+  inline-size: max-content;
+  height: max-content;
 `
 
-const AddSvg = ({ x, y, datum } : any) => {
-  const Icon = ({type}:any) => {
-    // if (type === '음식점') return <Svg1/>
-    // if (type === '학원') return <Svg2/>
-    // if (type === '의원') return <Svg3/>
-    // if (type === '미용실') return <Svg4/>
-    // if (type === '부동산') return <Svg5/>
-    // if (type === '카페') return <Svg6/>
-    return <></>
-  }
-  if ( datum.y === 0 ) return <></>;
-  return <svg x={x-26} y={y-120}><Icon type={datum.x}/></svg>
-};
 
-const Rect = styled.rect`
-`;
+const Page = () => {
+    const ref = useRef<HTMLDivElement>(null);
+    const [chartDataState, ] = useChartDataState();
+    console.log('victory state', chartDataState);
 
-const Victory = () => {
-  const [chartDataState, ] = useChartDataState();
-  console.log('victory state', chartDataState);
+    useEffect(() => {
+      // 들어가자마자 다운된다네! ㅎㅎ
+      // handleClick();
+    }, [])
+  
+    const handleClick = useCallback(async () => {
+      if (ref.current) {
+        downloadjs(await toJpeg(ref.current), "test1.jpg");
+        // downloadjs(await toSvg(ref.current), "test.svg");
+      }
+    }, []);
 
-  const data = [
-    { x: " ", y: 0, fontColor: 'transparent'},
-    { x: "음식점", y: 21.4, color: "#0C8BFF", dy:-32 },
-    { x: "학원", y:8.8, color: "#0C8BFF", dy:-32 },
-    { x: "의원", y: 5.9, color: "#0C8BFF" , dy:-32},
-    { x: "미용실", y: 3.9, color: "#A6D4FF", dy:-32 },
-    { x: "부동산", y: 3.0, color: "#A6D4FF", dy:-32 },
-    { x: "카페", y: 2.3, color: "#A6D4FF", dy:-32 },
-    { x: "  ", y: 0, fontColor: 'transparent' }
-  ];
+    const token = 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMTEyMDA3IiwidXNlcklkIjoxLCJ1c2VyR3JvdXAiOiJBRE1JTiIsInJvbGVzIjpbIlJPTEVfVVNFUiIsIlJPTEVfQURNSU4iXSwiaWF0IjoxNjgzNjIyODAzLCJleHAiOjE2ODM2MjY0MDN9.Z03jVL614Aas3ZmLWSkB4EF61AOsVVk_Pd0RdSxcVMI'
+ 
+    const onSubmitImage = async (ref: any) => {
+      const formData = new FormData()
+      const image = await domtoimage.toBlob(ref.current);
+      formData.append("fileCategory", "INSIGHT_ATTACHED_FILE")
+      formData.append("targetFile", image)
 
-  return (
-    <Container className='Container'>
-        <VictoryChart domainPadding={{ x: 0, y: 80}} width={860} height={520} containerComponent={<VictoryContainer responsive={false}/>}>
-        <VictoryAxis crossAxis 
-            width={500}
-            style={{
-                ticks: {stroke: "grey", size: (props:any) => { if(props.index === 0 || props.index === 7) return 0; return 5}},
-                tickLabels: {fontSize: 20, padding: 14}
-            }}
-        />
-        <VictoryBar
-            barRatio={0.6}
-            alignment="middle"
-            style={{
-                data: { fill: ({ datum }) => datum.color },
-            }}
-            data={data}
-            labels={({ datum }) => datum.y}
-            labelComponent={
-              <VictoryLabel 
-                className="myLabel"
-                dy={-28}
-                style={{ 
-                  fill: (props:any) => {
-                    if (props.datum.y === 0) return 'transparent';
-                    if (props.datum.color === "#0C8BFF" ) return 'white'; 
-                    return "#0C8BFF";
-                  },
-                  fontWeight: (props:any) => {
-                    if (props.datum.color === "#0C8BFF" ) return '600'; 
-                    return '300';
-                  },
-                  fontSize: '24',
-                }}
-                backgroundStyle={{
-                  fill: (props: any) => {
-                    if (props.datum.y === 0) return 'transparent';
-                    if (props.datum.color === "#A6D4FF" ) return 'transparent';
-                    return props.datum.color;
-                  }, 
-                }}
-                backgroundPadding={10} 
-                backgroundComponent={<Rect id={'id'} rx={6} transform="translate(0 -2)"/>}
-                data={data}
-                text={({ datum }) => `${datum.y}%`}
-              />
-            }
-        />
-        <VictoryScatter
-            data={data}
-            dataComponent={<AddSvg />}
-            />
-        </VictoryChart>
-    </Container>
-    
-  );
+      console.log('formdata', formData)
+
+      return axios
+          .post('https://puzzle-hub-dev.data-puzzle.com/api/puzzle-management/s3-files', formData, {
+            headers: {
+              'Content-Type': 'application/json', //multipart/form-data
+              "Authorization": `Bearer ${token}`,
+            },
+          })
+          .then((res) => {console.log(res);});
+
+    //   await axios({
+    //     method: "POST",
+    //     url: `https://puzzle-hub-dev.data-puzzle.com/api/puzzle-management/s3-files`,
+    //     headers: {
+    //       "Content-Type": "*/*", // Content-Type을 반드시 multipart/form-data 이렇게 하여야 한다.
+    //       "Authorization": `Bearer ${token}`,        
+    //     },
+    //     data: formData, // data 전송시에 반드시 생성되어 있는 formData 객체만 전송 하여야 한다.
+    // })
+
+    }
+    const insightData = {
+      "basicDisplayName": "입력테스트인사이트",
+      "insightUnitType": "BASIC",
+      "insightName": "sample12",
+      "cardImageSource": "s3://",
+      "detailCardTopImageSource": "s3://",
+      "insightType": "INTERACTIVE",
+      "contents": "CONTENTS LENGTH",
+      "hashTags": "지하철,테스트",
+      "userId": 5,
+      "enabled": true,
+      "creationDateTime": "2021-03-04T02:50:05.342",
+      "modificationDateTime": "2021-07-13T02:50:05.342"
+    }
+    const onSubmitInsight = async () => {
+      await axios({
+        method: "POST",
+        url: "https://puzzle-hub-dev.data-puzzle.com/api/puzzle-management/insights",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        data: insightData
+      })
+    }
+    return (
+      <Container>
+          <ImageContainer ref={ref}>
+              <Bar/>
+          </ImageContainer>
+          <button onClick={() => handleClick()}>Click</button>
+          <button onClick={() => onSubmitImage(ref)}>Image Submit</button>
+          <button onClick={() => onSubmitInsight()}>Image Submit</button>
+      </Container>
+    );
 }
 
-export default Victory;
+export default Page;

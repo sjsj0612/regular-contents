@@ -10,12 +10,18 @@ export async function GET() {
     }
     return NextResponse.json({ data });
 }
+    
+    // setChartDataState(res);
 
 export async function POST(request: Request) {
-    // const setChartDataState = useSetRecoilState(chartDataState);
+    // recoil state에 저장하는 hook
+    const setChartDataState = useSetRecoilState(chartDataState);
     const res = await request.json();
-    console.log('res', res)
-    // setChartDataState(res);
+    console.log('res', res);
+
+    // body를 state에 저장
+    setChartDataState(res);
+    
     return NextResponse.json({ res });
 }
 
