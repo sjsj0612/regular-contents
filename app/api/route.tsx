@@ -15,12 +15,12 @@ export async function GET() {
 
 export async function POST(request: Request) {
     // recoil state에 저장하는 hook
-    const setChartDataState = useSetRecoilState(chartDataState);
+    // const setChartDataState = useSetRecoilState(chartDataState);
     const res = await request.json();
     console.log('res', res);
 
     // body를 state에 저장
-    setChartDataState(res);
+    // setChartDataState(res);
     
     return NextResponse.json({ res });
 }
